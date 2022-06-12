@@ -1,7 +1,8 @@
 module cnc
 
-import time
+import io
 import net
+import time
 
 pub struct Swatnet {
 	pub mut:
@@ -31,9 +32,10 @@ pub fn (mut s Swatnet) listener() {
 			return
 		}
 		client.set_read_timeout(time.infinite)
+		s.handler(mut client)
 	}
 }
 
-pub fn (mut s Swatnet) handler() {
-	
+pub fn (mut s Swatnet) handler(mut client net.TcpConn) {
+	mut reader := io.new_buffered_reader(reader: client)
 }
