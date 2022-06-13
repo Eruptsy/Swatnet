@@ -82,11 +82,12 @@ pub fn (mut s Swatnet) handler(mut client net.TcpConn) {
 	for {
 		client.write_string(">>> ") or { 0 }
 		data := reader.read_line() or { "" }
-
-		match data {
-			"help" {
-				client.write_string("Working\r\n") or { 0 }
-			} else {}
+		if data.len > 5 {
+			match data {
+				"help" {
+					client.write_string("Working\r\n") or { 0 }
+				} else {}
+			}
 		}
 	}
 }

@@ -4,7 +4,7 @@ import net
 
 fn main() {
 	mut args := os.args.clone()
-	if args < 4 {
+	if args.len < 4 {
 		println("[x] Error, arguments provided!\n${args[0]} <ip> <port>")
 		exit(0)
 	}
@@ -16,7 +16,7 @@ fn main() {
 
 fn server(ip string, port string, pw string) { 
 	mut server := net.dial_tcp("${ip}:${port}") or {
-		pritnln("[x] Error, Unable to connect to the server....")
+		println("[x] Error, Unable to connect to the server....")
 		exit(0)
 	}
 
