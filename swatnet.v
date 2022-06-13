@@ -17,9 +17,9 @@ fn main() {
 					if arg.int() > 0 || arg.int() < 65500 { 
 						s.bot_port = args[i+1].int()
 					}
-					if "-pw" in args {
-						s.bot_pw = args[i+1]
-					}
+				}
+				"-pw" {
+					s.bot_pw = args[i+1]
 				} else {}
 			}
 		}
