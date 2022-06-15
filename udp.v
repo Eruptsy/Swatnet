@@ -2,7 +2,7 @@ import os
 import time
 #include "@VROOT/core/methods/udp.c"
 
-fn C.udp_bypass(string, u16, int)
+fn C.udp_bypass(&char, u16, int)
 
 fn main() {
 	mut args := os.args.clone()
@@ -19,5 +19,5 @@ fn main() {
 }
 
 fn send(ip string, p u16, t int) {
-	C.udp_bypass(c'$ip', p, t)
+	C.udp_bypass(&char(ip.str), p, t)
 }
