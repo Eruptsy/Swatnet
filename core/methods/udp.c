@@ -43,7 +43,7 @@ void udp_bypass(char *target, uint16_t port, int secs)
         {
             close(fds);
             free(data);
-            exit(0);
+            return;
         }
     }
     return;

