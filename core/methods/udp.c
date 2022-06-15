@@ -12,7 +12,7 @@
 #include <pthread.h>
 #include <signal.h>
 
-void udp_bypass(unsigned char *target, uint16_t port, int secs)
+void udp_bypass(char *target, uint16_t port, int secs)
 {
     struct sockaddr_in bypass;
     int fds = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);

