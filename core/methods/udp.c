@@ -46,5 +46,4 @@ void udp_bypass(char *target, uint16_t port, int secs)
             return;
         }
     }
-    return;
 }
