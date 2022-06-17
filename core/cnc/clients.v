@@ -127,7 +127,7 @@ pub fn (mut s Swatnet) handler(mut client net.TcpConn) {
 					client.write_string("[ x ] Error, No command found....!\r\n") or { 0 }
 				}
 			}
-			println(data)
+			println(fcmd)
 		}
 	}
 }

