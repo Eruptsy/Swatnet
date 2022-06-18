@@ -127,7 +127,7 @@ pub fn (mut b Bot_CNC) parse_buffer(buff string) (string, string, []string) {
 pub fn (mut b Bot_CNC) randomize_nick() string {
 	chars := "q,w,e,r,t,y,u,i,o,p,a,s,d,f,g,h,j,k,l,z,x,c,v,b,n,m,1,2,3,4,5,6,7,8,9,0".split(",")
 	mut random_nick := ""
-	for _ in 0..15 {
+	for _ in 0..10 {
 		random_num := rand.int_in_range(0, chars.len) or { return "failed_nick" }
 		random_nick += chars[random_num]
 	}
