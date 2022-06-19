@@ -33,7 +33,7 @@ pub fn locate_db() string {
 }
 
 pub fn (mut u User) parse(line string) []string {
-	return line.replace("('", "").replace("')", "").split(",")
+	return line.replace("('", "").replace("')", "").split("','")
 }
 
 pub fn (mut u User) user_count() int {
@@ -50,6 +50,7 @@ pub fn (mut non User) find(usern string) User {
 	for user in users {
 		if user.len < 3 { return u }
 		user_info := u.parse(user)
+
 		if user_info[1] == usern {
 			u.id = user_info[0].int()
 			u.username = user_info[1]
@@ -76,7 +77,7 @@ pub fn (mut u User) create(usern string, passw string, user_ip string) string {
 	}
 	new_user_count := u.user_count()
 	hid_pw := sha1.sum(passw.bytes()).hex()
-	users_db.write("('${new_user_count}','${usern}','${user_ip}','${hid_pw}','0','0','0','0','0','00/00/00')\n".bytes()) or { 
+	users_db.write("('${new_user_count}','${usern}','no_key','${user_ip}','${hid_pw}','0','0','0','0','0','00/00/00')\n".bytes()) or { 
 		logger.console_log("failed_to_write_to_db", "Unable to write to database file....!", true)
 		return ""
 	}
