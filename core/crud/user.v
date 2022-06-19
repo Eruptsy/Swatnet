@@ -4,6 +4,7 @@ import os
 import crypto.sha1
 
 import crud
+import core.logger
 
 const db_filepath_linux = os.getwd() + "/assets/db/users.db"
 const db_filepath_windws = os.getwd() + "\\assets\\db\\users.db"
@@ -32,7 +33,7 @@ pub fn locate_db() string {
 }
 
 pub fn (mut u User) parse(line string) []string {
-	return line.replace("('", "").replace("')", "").split("','")
+	return line.replace("('", "").replace("')", "").split(",")
 }
 
 pub fn (mut u User) user_count() int {
@@ -68,15 +69,15 @@ pub fn (mut non User) find(usern string) User {
 }
 
 pub fn (mut u User) create(usern string, passw string, user_ip string) string {
-	if u.find(usern).username == "" { return "[x] Error, Username already taken...!" }
+	if u.find(usern).username.len > 2 { return "[x] Error, Username already taken...!" }
 	mut users_db := os.open_append(crud.locate_db()) or { 
-		println("[x] Error, Unable to write to database file....!")
+		logger.console_log("failed_to_open_db", "Unable to write to database file....!", true)
 		return "[x] Error, Something went wrong trying to add user to database....!"
 	}
-	new_user_count := u.user_count()+1
+	new_user_count := u.user_count()
 	hid_pw := sha1.sum(passw.bytes()).hex()
-	users_db.write("('${new_user_count}','${user_ip}','${hid_pw}','0','0','0','0','0','00/00/00".bytes()) or { 
-		println("[x] Error, Unable to write to database file....!")
+	users_db.write("('${new_user_count}','${usern}','${user_ip}','${hid_pw}','0','0','0','0','0','00/00/00')\n".bytes()) or { 
+		logger.console_log("failed_to_write_to_db", "Unable to write to database file....!", true)
 		return ""
 	}
 	users_db.close()
