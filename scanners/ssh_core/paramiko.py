@@ -4,18 +4,45 @@ class SSH():
     global device_ip
     global device_user
     global device_pass
-    ssh = None
+    global SSH
 
     def __init__(self, i, usr, pw):
         self.device_ip = i
         self.device_user = usr
         self.device_pass = pw
+
+    def change_device(self, ip, usr, pw) -> None:
+        self.device_ip = ip
+        self.device_user = usr
+        self.device_pass = pw
         
-    def connect(self):
+    def connect(self) -> int:
         self.SSH = paramiko.client.SSHClient()
         self.SSH.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        print("{0} {1} {2}".format(self.device_ip, self.device_user, self.device_pass))
         try:
-            self.connect(self.ip, username=self.device_user, password=self.device_pass)
+            self.SSH.connect(self.device_ip, username=self.device_user, password="wefwe")
+            return 1
         except:
-            print("failed to login")
+            return -1
+
+    def close(self) -> None:
+        self.SSh.close()
+
+    def brute(self, ip: str, user: str, pw: str) -> int:
+        self.device_ip = ip
+        self.device_user = user
+        self.device_pass = pw
+        check_auth = self.connect()
+        if check_auth: 
+            self.close()
+            return 1
+        return 0
+        
+    def send_cmd(self, cmd) -> int:
+        try:
+            self.connect()
+            stdin, stdout, stderr = self.SSH.exec_command(cmd)
+            self.close()
+            return 1
+        except:
+            return -1

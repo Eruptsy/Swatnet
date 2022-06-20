@@ -22,6 +22,7 @@ fn main() {
 	mut s := go server(args[1], args[2], args[3])
 	for {
 		s.wait()
+		time.sleep(1*time.second)
 		s = go server(args[1], args[2], args[3])
 	}
 }
