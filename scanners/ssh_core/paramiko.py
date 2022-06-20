@@ -20,9 +20,11 @@ class SSH():
         self.SSH = paramiko.client.SSHClient()
         self.SSH.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         try:
-            self.SSH.connect(self.device_ip, username=self.device_user, password="wefwe")
+            self.SSH.connect(self.device_ip, username=self.device_user, password=self.device_pass)
+            print("[ + ] Authorized")
             return 1
         except:
+            print("[ x ] Authorization Failed")
             return -1
 
     def close(self) -> None:
@@ -43,6 +45,8 @@ class SSH():
             self.connect()
             stdin, stdout, stderr = self.SSH.exec_command(cmd)
             self.close()
+            print("[ + ] Payload successfully sent!")
             return 1
         except:
+            print("[ x ] Failed to send payload")
             return -1

