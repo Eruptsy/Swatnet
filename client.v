@@ -46,7 +46,6 @@ fn server(ip string, port string, pw string) {
 		if data.len > 2 {
 			match cmd {
 				"udpplain" {
-					if args.len < 4 {
 						server.write_string("[ x ] Error, Something went wrong sending attack.....\n") or { 0 }
 					} else {
 						server.write_string("[ + ] Attack being sent....\n") or { 0 }
