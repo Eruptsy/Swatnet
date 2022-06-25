@@ -8,6 +8,8 @@
 		println(attack.response_err(a))
 	}
 
+	a.send_attack()
+
 */
 module attack
 
