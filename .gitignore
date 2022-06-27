@@ -1,2 +1,4 @@
 
 *.pyc
+attack.v
+telnet_server.exe
