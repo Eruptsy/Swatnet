@@ -2,7 +2,6 @@ import os
 
 import core.cnc
 import core.logger
-import core.attack
 
 fn main() {
 	mut args := os.args.clone()

