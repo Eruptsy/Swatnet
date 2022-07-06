@@ -1,0 +1,10 @@
+{
+    "API_Name": {
+        "api_toggle": "true",
+        "api_url": "",
+        "api_maxtime": "600",
+        "api_maxconn": "3",
+        "api_methods": "udpflood,stdhex,vseflood,synflood,ackflood,tcpbypass,udppps,stdpps,https,tcpkill,sshcrash",
+        "api_funnels": ""
+    }
+}

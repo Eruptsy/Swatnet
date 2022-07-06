@@ -1,7 +1,6 @@
 module attack
 
 pub fn (mut a AttackInfo) send_bots() Responses {
-	println("here")
 	for  mut i in a.bots {
 		i.write_string(a.generate_cmd()) or { 0 }
 	}

